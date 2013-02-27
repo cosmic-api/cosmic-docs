@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Cosmic documentation build configuration file, created by
-# sphinx-quickstart on Sat Feb 23 02:32:14 2013.
+# sphinx-quickstart on Wed Feb 27 00:51:11 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -64,7 +64,7 @@ release = '0.0.1'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = []
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -99,7 +99,7 @@ html_theme = 'sphinx-bootstrap'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ["sphinx-bootstrap"]
+html_theme_path = ["../sphinx-bootstrap"]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
