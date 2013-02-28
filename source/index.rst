@@ -6,11 +6,7 @@
 Welcome to Cosmic's documentation!
 ==================================
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
+Nothing to see here. Yet.
 
 
 Indices and tables
