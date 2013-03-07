@@ -6,8 +6,11 @@
 Welcome to Cosmic's documentation!
 ==================================
 
-Nothing to see here. Yet.
+.. toctree::
+   :maxdepth: 2
+   :numbered:
 
+   models
 
 Indices and tables
 ==================
