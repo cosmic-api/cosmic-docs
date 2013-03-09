@@ -1,18 +1,6 @@
 Model System
 ============
 
-Cosmic ships with a simple JSON-based schema and model system. A JSON schema
-is a way of describing JSON data for validation and generating documentation.
-A model is a type definition that may have a schema of its own as well as
-custom validation functionality. Once a model is created, any JSON schema can
-reference it by its name.
-
-JSON Schema Basics
-------------------
-
-A *schema* is a recursive JSON structure that mirrors the structure of the
-data it is meant to validate.
-
 .. note::
 
     *Why invent our own JSON schema system?*
@@ -36,62 +24,108 @@ data it is meant to validate.
     detail are greatly outweighed by the costs of growing the amount of code
     that needs to be ported.
 
-A schema is always a JSON object. It must always contain the *type* attribute.
-Here is a list of types and their JSON representation:
+.. glossary::
 
-+-------------------------+---------------------+
-|         Schema          |  JSON type          |
-+=========================+=====================+
-| ``{"type": "integer"}`` | ``number``          |
-+-------------------------+---------------------+
-| ``{"type": "float"}``   | ``number``          |
-+-------------------------+---------------------+
-| ``{"type": "string"}``  | ``string``          |
-+-------------------------+---------------------+
-| ``{"type": "boolean"}`` | ``boolean``         |
-+-------------------------+---------------------+
-| ``{"type": "binary"}``  | ``string`` (base64) |
-+-------------------------+---------------------+
-| ``{"type": "array"}``   | ``array``           |
-+-------------------------+---------------------+
-| ``{"type": "object"}``  | ``object``          |
-+-------------------------+---------------------+
-| ``{"type": "json"}``    | N/A                 |
-+-------------------------+---------------------+
-| ``{"type": "schema"}``  | N/A                 |
-+-------------------------+---------------------+
+    Model
 
-An object schema must always contain a *properties* attribute, which will be
-an array of property objects:
+        A data type definition that consists of a normalization and a
+        serialization function. The output of a model's normalization function
+        must be of the same form as the input of its serialization function.
+        Together, these functions define the *normalized form* of the data.
 
-.. code:: json
+    Normalized form
 
-    {
-        "type": "object",
-        "properties": [
-            {
-                "name": "id",
-                "schema": {"type": "integer"},
-                "required": true
-            },
-            {
-                "name": "title",
-                "schema": {"type": "string"},
-                "required": false
-            }
-        ]
-    }
+        Data in its rich internal representation. For most built-in types,
+        this data will consist of language primitives. In object-oriented
+        languages, normalized data will often take the form of class
+        instances.
 
-An array schema must always contain an *items* property, which must be a
-schema that describes every item in the array. Here is a schema describing an
-array or strings:
+    Normalization
 
-.. code:: json
+        Turning data as provided by the JSON parser into its normalized form.
+        Validation is always performed during normalization.
 
-    {
-        "type": "array",
-        "items": {"type": "string"}
-    }
+    Serialization
+
+        Turning normalized data into the form expected by the JSON serializer.
+
+Cosmic provides the following built-in types:
+
++-----------+-----------+-------------------+
+| Type      |           |  JSON Type        |
++===========+===========+===================+
+| integer   | basic     | number            |
++-----------+-----------+-------------------+
+| float     | basic     | number            |
++-----------+-----------+-------------------+
+| string    | basic     | string            |
++-----------+-----------+-------------------+
+| boolean   | basic     | boolean           |
++-----------+-----------+-------------------+
+| binary    | basic     | string (base64)   |
++-----------+-----------+-------------------+
+| array     | composite | array             |
++-----------+-----------+-------------------+
+| object    | composite | object            |
++-----------+-----------+-------------------+
+| json      | basic     | N/A               |
++-----------+-----------+-------------------+
+| schema    | composite | N/A               |
++-----------+-----------+-------------------+
+
+Schemas
+-------
+
+.. glossary::
+
+    Schema
+
+        An object capable of normalizing and serializing complex JSON data.
+        Internally it is a composition of models. Because schemas need to be
+        passed over the wire, they are implemented as models themselves.
+
+Because schemas are models, they have a normalized form and a JSON form. The
+normalized form of a schema must provide methods to normalize and serialize
+data that the schema describes. Internally, these methods delegate their work
+to the actual model whose data the schema describes. A schema is effectively
+a wrapper for a model:
+
+.. image:: _static/schemas-are-models.png
+
+The way the normalized form of the schema works is up to the implementation.
+The serialized form (JSON form) is the primary way of dealing with schemas and
+will work across implementations. From this point on, *schema* will refer to
+the serialized form.
+
+A *schema* is a recursive JSON structure that mirrors the structure of the
+data it is meant to validate. A schema is always a JSON object. It must always
+contain the *type* attribute. Object (associative array) and array schemas
+require extra information. Below is the grammar for a JSON schema:
+
+.. code:: text
+
+    <schema>        ::= <simple-schema> | <array-schema> | <object-schema>
+
+    <simple-type>   ::= '"integer"' | '"float"' | '"string"' | '"boolean"'
+                        | '"binary"' | '"json"' | '"schema"' | <api-name> '.' <model-name>
+
+    <simple-schema> ::= '{' '"type"' ':' <simple-type> '}'
+
+    <array-schema>  ::= '{' '"type"' ':' '"array"' ',' '"items"' ':' <schema> '}'
+
+    <object-schema> ::= '{' '"type"'       ':' '"object"' ','
+                            '"properties"' ':' '[' <properties> ']' '}'
+
+    <properties>    ::= <property> | <property> ',' <properties>
+
+    <property>      ::= '{' '"name"'     ':' <string>  ',' 
+                            '"required"' ':' <boolean> ','
+                            '"schema"'   ':' <schema>  '}'
+
+In plain English, a schema is always a JSON object, it must always have a
+*type* attribute. An array schema requires an *items* attribute, which will be
+a schema that describes every item in the matched array. An object schema
+requires a *properties* attribute, which will be an array of property objects.
 
 Of course, these schemas can be nested as deep as you like. For example, to
 validate ``[{"name": "Rose"}, {"name": "Lily"}]``, you could use the following
@@ -113,140 +147,132 @@ schema:
         }
     }
 
-Models
-------
+..
+    Built-In Types
+    --------------
 
-A *model* is a data type definition that consists of a schema and custom
-validation code. A model must be able to *normalize* and *serialize* data. A
-model's normalize procedure takes data as presented by the JSON parser and
-either returns the *normalized data* or throws a validation error. The 
-serialize procedure does the opposite, but without validation.
+    The normalized form of the built-in models is implementation-dependent and
+    will be defined in language-specific documentation. The serialized form and
+    the validation logic, however, is strictly the same across all
+    implementations. Below is a list of all built-in models and their validation
+    logic:
 
-For primitive schema types, the normalized data will usually be a language
-primitive: if you normalize an integer against ``{"type": "integer"}`` you
-will get an integer in return. Sometimes, the normalization procedure may cast
-one primitive to another. For example, the model responsible for ``{"type":
-"float"}`` will cast an integer into a float.
+    WIP.
 
-In object-oriented languages, a model is best represented by a class. For
-simple types, this class is merely a namespace holding the corresponding
-normalization and serialization functions. For most user-defined models, the
-class has a bigger purpose: it will be instantiated at the end of the model's
-normalization procedure and the instance will be returned as the normalized
-data.
+    Models
+    ------
 
-Cosmic will normalize all incoming data and serialize all outgoing data for
-you. This means that your function can always operate on rich native data,
-leaving JSON in the model system, where it belongs.
+    In object-oriented languages, a model is best represented by a class. For
+    simple types, this class is merely a namespace holding the corresponding
+    normalization and serialization functions. For most user-defined models, the
+    class has a bigger purpose: it will be instantiated at the end of the model's
+    normalization procedure and the instance will be returned as the normalized
+    data.
 
-If you define a model as part of an API, it will become accessible via
-``{"type": "<api>.<model>"}``.
+    Cosmic will normalize all incoming data and serialize all outgoing data for
+    you. This means that your function can always operate on rich native data,
+    leaving JSON in the model system, where it belongs.
 
-Raw JSON Data
-~~~~~~~~~~~~~
+    If you define a model as part of an API, it will become accessible via
+    ``{"type": "<api>.<model>"}``.
 
-A few words need to be said about ``{"type": "json"}``. This type represents
-arbitrary JSON data. No validation is performed. You may want to use this type
-as a wildcard when you don't know in advance what the data will look like, or
-if you expect a separate system to deal with it.
+    Raw JSON Data
+    ~~~~~~~~~~~~~
 
-Do not use it as a way of allowing multiple types for a property. Each
-property should have just one type.
+    A few words need to be said about ``{"type": "json"}``. This type represents
+    arbitrary JSON data. No validation is performed. You may want to use this type
+    as a wildcard when you don't know in advance what the data will look like, or
+    if you expect a separate system to deal with it.
 
-Schema Models
-~~~~~~~~~~~~~
+    Do not use it as a way of allowing multiple types for a property. Each
+    property should have just one type.
 
-Schemas, the objects that normalize and serialize data, need to be normalized
-and serialized themselves. In order to enable this, they are implemented as
-models, validated against ``{"type": "schema"}``.
+    Schema Models
+    ~~~~~~~~~~~~~
 
-When you normalize ``{"type": "integer"}`` against ``{"type": "schema"}``,
-the result will be an integer model that you can then use to normalize actual
-integers. Of course ``{"type": "integr"}`` will result in a validation error.
+    All schemas except for ``object`` and ``array`` are represented by an object
+    with a single attribute *type*. To validate such a schema, the model uses the
+    following meta-schema:
 
-All schemas except for ``object`` and ``array`` are represented by an object
-with a single attribute *type*. To validate such a schema, the model uses the
-following meta-schema:
+    .. code:: json
 
-.. code:: json
+        {
+            "type": "object",
+            "properties": [
+                {
+                    "name": "type",
+                    "required": true,
+                    "schema": {"type": "string"}
+                }
+            ]
+        }
 
-    {
-        "type": "object",
-        "properties": [
-            {
-                "name": "type",
-                "required": true,
-                "schema": {"type": "string"}
-            }
-        ]
-    }
+    An array schema needs more than just *type*. It also needs *items*:
 
-An array schema needs more than just *type*. It also needs *items*:
+    .. code:: json
 
-.. code:: json
+        {
+            "type": "object",
+            "properties": [
+                {
+                    "name": "type",
+                    "required": true,
+                    "schema": {"type": "string"}
+                },
+                {
+                    "name": "items",
+                    "required": true,
+                    "schema": {"type": "schema"}
+                }
+            ]
+        }
 
-    {
-        "type": "object",
-        "properties": [
-            {
-                "name": "type",
-                "required": true,
-                "schema": {"type": "string"}
-            },
-            {
-                "name": "items",
-                "required": true,
-                "schema": {"type": "schema"}
-            }
-        ]
-    }
+    An ``object`` schema requires *properties* (note that it also checks to make
+    sure there are no duplicate properties):
 
-An ``object`` schema requires *properties* (note that it also checks to make
-sure there are no duplicate properties):
+    .. code:: json
 
-.. code:: json
-
-    {
-        "type": "object",
-        "properties": [
-            {
-                "name": "type",
-                "required": true,
-                "schema": {"type": "string"}
-            },
-            {
-                "name": "properties",
-                "required": true,
-                "schema": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": [
-                            {
-                                "name": "name",
-                                "required": true,
-                                "schema": {"type": "string"}
-                            },
-                            {
-                                "name": "required",
-                                "required": true,
-                                "schema": {"type": "boolean"}
-                            },
-                            {
-                                "name": "schema",
-                                "required": true,
-                                "schema": {"type": "schema"}
-                            }
-                        ]
+        {
+            "type": "object",
+            "properties": [
+                {
+                    "name": "type",
+                    "required": true,
+                    "schema": {"type": "string"}
+                },
+                {
+                    "name": "properties",
+                    "required": true,
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": [
+                                {
+                                    "name": "name",
+                                    "required": true,
+                                    "schema": {"type": "string"}
+                                },
+                                {
+                                    "name": "required",
+                                    "required": true,
+                                    "schema": {"type": "boolean"}
+                                },
+                                {
+                                    "name": "schema",
+                                    "required": true,
+                                    "schema": {"type": "schema"}
+                                }
+                            ]
+                        }
                     }
                 }
-            }
-        ]
-    }
+            ]
+        }
 
-As you can see, the ``schema`` type is quite handy. Not only is it used by the
-model system internally but also by other modules in Cosmic. It allows such
-things as actions to be implemented as simple models.
+    As you can see, the ``schema`` type is quite handy. Not only is it used by the
+    model system internally but also by other modules in Cosmic. It allows such
+    things as actions to be implemented as simple models.
 
 A Word About Null
 -----------------
