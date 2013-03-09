@@ -98,38 +98,29 @@ will work across implementations. From this point on, *schema* will refer to
 the serialized form.
 
 A *schema* is a recursive JSON structure that mirrors the structure of the
-data it is meant to validate. A schema is always a JSON object. It must always
-contain the *type* attribute. Object (associative array) and array schemas
-require extra information. Below is the grammar for a JSON schema:
+data it is meant to validate. Below is the grammar for a JSON schema:
 
-.. code:: text
-
-    <schema>        ::= <simple-schema> | <array-schema> | <object-schema>
-
-    <simple-type>   ::= '"integer"' | '"float"' | '"string"' | '"boolean"'
-                        | '"binary"' | '"json"' | '"schema"' | <api-name> '.' <model-name>
-
-    <simple-schema> ::= '{' '"type"' ':' <simple-type> '}'
-
-    <array-schema>  ::= '{' '"type"' ':' '"array"' ',' '"items"' ':' <schema> '}'
-
-    <object-schema> ::= '{' '"type"'       ':' '"object"' ','
-                            '"properties"' ':' '[' <properties> ']' '}'
-
-    <properties>    ::= <property> | <property> ',' <properties>
-
-    <property>      ::= '{' '"name"'     ':' <string>  ',' 
-                            '"required"' ':' <boolean> ','
-                            '"schema"'   ':' <schema>  '}'
+.. productionlist:: schema
+    schema: `simple_schema` | `array_schema` | `object_schema`
+    simple_type: '"integer"' | '"float"' | '"string"' | '"boolean"' | '"binary"'
+               : | '"json"' | '"schema"' | `identifier` '.' `identifier`
+    simple_schema: '{' '"type"' ':' `simple_type` '}'
+    array_schema: '{' '"type"' ':' '"array"' ',' '"items"' ':' `schema` '}'
+    object_schema: '{' '"type"' ':' '"object"' ',' '"properties"' ':' '[' (`property`)+ ']' '}'
+    property: '{' '"name"' ':' `string`  ',' '"required"' ':' `boolean` ',' '"schema"' ':' `schema` '}'
+    identifier: [A-Za-z0-9_]+
 
 In plain English, a schema is always a JSON object, it must always have a
-*type* attribute. An array schema requires an *items* attribute, which will be
-a schema that describes every item in the matched array. An object schema
-requires a *properties* attribute, which will be an array of property objects.
+*type* attribute. An array schema also requires an *items* attribute, which
+will be a schema that describes every item in the matched array. An object
+(associative array) schema requires a *properties* attribute, which will be an
+array of property objects.
 
-Of course, these schemas can be nested as deep as you like. For example, to
-validate ``[{"name": "Rose"}, {"name": "Lily"}]``, you could use the following
-schema:
+**An object schema cannot define two properties with the same name. Trying to
+normalize such a schema must result in a validation error.**
+
+To validate ``[{"name": "Rose"}, {"name": "Lily"}]``, you could use the
+following schema:
 
 .. code:: json
 
@@ -147,17 +138,59 @@ schema:
         }
     }
 
+Built-In Types
+--------------
+
+The normalized form of the built-in models is implementation-dependent and
+will be defined in language-specific documentation. The serialized form and
+the validation logic, however, is strictly the same across all
+implementations. Below is a list of all built-in models and their validation
+logic.
+
+``integer``
+    Must be expressed as a JSON number. If the number has a decimal, the
+    fractional part must be 0.
+
+``float``
+    Must be expressed as a JSON number. Implementation should support double-precision.
+
+``string``
+    Must be expressed as a JSON string. Encoding must be UTF-8. Unicode errors
+    must be dealt with strictly by throwing a validation error.
+
+``boolean``
+    Must be expressed as a JSON boolean.
+
+``binary``
+    Must be expressed as a JSON string containing Base64 encoded binary data.
+    Base64 errors must result in a validation error.
+
+``array``
+    Must be expressed as a JSON array. The implementation must normalize each
+    of its items against the *items* schema. If an item normalization fails
+    with a validation error, the array normalization must fail too. The
+    normalized form of an array must be an ordered sequence of normalized
+    items, in the same order as they appear in the JSON form. If the array was
+    empty, an empty sequence must be returned.
+
+``object``
+    WIP
+
+``json``
+    WIP
+
+``schema``
+    WIP
+ 
 ..
-    Built-In Types
-    --------------
+    Must be expressed as a JSON object. If the object has a key that is
+    different from every property name in *properties*, a validation error
+    must be thrown. Likewise, if *properties* has a required property whose
+    name is not a key in the object, a validation error must be thrown. For
+    every key-value pair in the object, the value must be normalized against
+    the *schema* of the corresponding property in *properties*. The normalized
+    form of the object must be an associative array containing
 
-    The normalized form of the built-in models is implementation-dependent and
-    will be defined in language-specific documentation. The serialized form and
-    the validation logic, however, is strictly the same across all
-    implementations. Below is a list of all built-in models and their validation
-    logic:
-
-    WIP.
 
     Models
     ------
