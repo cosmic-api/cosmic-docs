@@ -7,13 +7,13 @@ Model System
     
     Before deciding to go with our own system, we took a good look at some
     existing options. Our best candidates were `JSON Schema <http://json-
-    schema.org/>`_ and `Apache Avro <http://avro.apache.org/>`_. JSON Schema
-    has a significant limitation: the order of object attributes is not
-    preserved. Apache Avro had a different problem: because an attribute can
-    be defined as allowing multiple types, objects needed to be wrapped in an
-    annotation layer to avoid ambiguity. Instead of ``{"name": "Jenn"}`` we
-    would have to output ``{"Person": {"name": "Jenn"}}``. In the context of
-    REST APIs, this is uncommon and potentially confusing.
+    schema.org/>`_, `Apache Avro <http://avro.apache.org/>`_ and `JSchema
+    <http://jschema.org/>`_.
+
+    Because our schemas are used to generate documentation, the order of
+    object properties needs to be preserved, there also needs to be a way to
+    inline documentation text. Flexibility is actually detrimental for our use
+    case. Our system calls for a rigid and dead-simple approach.
 
     Because Cosmic must be extremely portable, it is essential that we keep
     the feature list to a minimum. In this instance, the minimum is generating
@@ -23,6 +23,8 @@ Model System
     power of your language. The benefits of describing schemas in minute
     detail are greatly outweighed by the costs of growing the amount of code
     that needs to be ported.
+    
+    The Python implementation of the model system is around 500 lines of code.
 
 .. glossary::
 
