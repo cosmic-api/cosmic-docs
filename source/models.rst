@@ -116,15 +116,17 @@ Schemas
 
     Schema
 
-        An object capable of normalizing and serializing complex JSON data.
-        Because schemas need to be passed over the wire, they are implemented
-        as models themselves.
+        An object capable of normalizing and serializing complex JSON data. A
+        recursive JSON structure that mirrors the data it is meant to
+        validate.
 
-Like any models, schemas have a normalized form and a JSON form. The
+Because schemas need to be passed over the wire, they are implemented as
+models. Like any models, schemas have a normalized form and a JSON form. The
 normalized form of a schema must provide methods to normalize and serialize
-data that the schema describes. Internally, these methods delegate their work
-to the actual model whose data the schema describes. A normalized schema is
-effectively a wrapper for a model:
+data that the schema describes, this is the primary function of the schema.
+Internally, however, these methods delegate their work to the actual model
+whose data the schema describes. A normalized schema is effectively a wrapper
+for a model:
 
 .. image:: _static/schemas-are-models.png
 
@@ -133,8 +135,13 @@ The serialized form (JSON form) is the primary way of dealing with schemas and
 will work across implementations. From this point on, *schema* will refer to
 the serialized form.
 
-A *schema* is a recursive JSON structure that mirrors the structure of the
-data it is meant to validate. Below is the grammar for a JSON schema:
+In plain English, a schema is always a JSON object, it must always have a
+*type* attribute. An array schema also requires an *items* attribute, which
+will be a schema that describes every item in the matched array. An object
+(associative array) schema requires a *properties* attribute, which will be an
+array of objects describing each property of the data.
+
+Below is the grammar for a JSON schema:
 
 .. _schema-grammar:
 
@@ -148,18 +155,15 @@ data it is meant to validate. Below is the grammar for a JSON schema:
     property: '{' '"name"' ':' `string`  ',' '"required"' ':' `boolean` ',' '"schema"' ':' `schema` '}'
     identifier: [A-Za-z0-9_]+
 
-In plain English, a schema is always a JSON object, it must always have a
-*type* attribute. An array schema also requires an *items* attribute, which
-will be a schema that describes every item in the matched array. An object
-(associative array) schema requires a *properties* attribute, which will be an
-array of property objects.
+.. note::
+    An object schema cannot define two properties with the same name. Trying to
+    normalize such a schema must result in a validation error. The two identifiers
+    above correspond to the API name and a name of the API's model. This makes it
+    possible to reference models like so: ``{"type": "tweeter.Twit"}``.
 
-If you define a model as part of an API, it will become accessible via
-``{"type": "<api>.<model>"}``. When this kind of schema is encountered, Cosmic
-will find the model and plug it into the resulting schema object.
-
-**An object schema cannot define two properties with the same name. Trying to
-normalize such a schema must result in a validation error.**
+When an external model is referenced, Cosmic will find the model and plug it
+into the resulting schema object. If the model belongs to an external API,
+Cosmic will fetch its schema and build a dummy for the schema object.
 
 To validate ``[{"name": "Rose"}, {"name": "Lily"}]``, you could use the
 following schema:
