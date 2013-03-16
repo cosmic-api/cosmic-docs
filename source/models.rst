@@ -189,25 +189,29 @@ following schema:
 A Word About Null
 -----------------
 
-The only place where ``null`` is allowed within our JSON schema system is in a
+The only place where ``null`` is allowed within JSON-serialized data is in a
 ``json`` model. Anywhere else, ``null`` will result in a validation error. If
 there is no data for an optional property, it must be omitted from the
 payload.
 
 The reason for this rigid rule is to avoid ambiguity between ``null`` as an
-explicit value and ``null`` as the absense of value. In JavaScript, these
-entities are represented by ``null`` and ``undefined`` respectively.
+absense of value and ``null`` as an explicit value. For example, to
+distinguish between an empty request body and a 4-character request body that
+reads ``null``. In JavaScript, these entities are represented by ``null`` and
+``undefined`` respectively. In many other languages this distinction does not
+exist.
 
-One place where this ambiguity is problematic is in JSON payloads. There must
-be a way of distinguishing between an empty request body and a 4-character
-request body that reads ``null``. Unfortunately, some HTTP libraries that
-offer the convenience of JSON parsing don't make this distinction.
+In most implementations, ``null`` may be used in the normalized form to denote
+an absense of value. For example, one might set an object property to ``null``
+to remove it from the object. During serialization, these properties will be
+omitted. The only time where this may cause trouble is if the property is of
+type ``json``. Will the serializer omit it or treat it as an explicit value?
 
 In the canonical Python implementation, the ambiguity is resolved by wrapping
 the JSON value in an object. Even if the JSON value is ``null``, the object is
 there to show that it is an explicit value. If the place of the object is
-taken by a native ``null`` (``None`` in Python), the system sees that the
-request body was empty.
+taken by a native ``null`` (``None`` in Python), the system sees that no value
+was passed.
 
 Implementation Notes
 --------------------
