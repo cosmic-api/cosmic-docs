@@ -147,12 +147,15 @@ Below is the grammar for a JSON schema:
 
 .. productionlist:: schema
     schema: `simple_schema` | `array_schema` | `object_schema`
-    simple_type: '"integer"' | '"float"' | '"string"' | '"boolean"' | '"binary"'
-               : | '"json"' | '"schema"' | `identifier` '.' `identifier`
+    simple_type: '"integer"' | '"float"' | '"string"' | '"boolean"' | '"binary"' |
+               : '"json"' | '"schema"' | `identifier` '.' `identifier`
     simple_schema: '{' '"type"' ':' `simple_type` '}'
     array_schema: '{' '"type"' ':' '"array"' ',' '"items"' ':' `schema` '}'
-    object_schema: '{' '"type"' ':' '"object"' ',' '"properties"' ':' '[' (`property`)+ ']' '}'
-    property: '{' '"name"' ':' `string`  ',' '"required"' ':' `boolean` ',' '"schema"' ':' `schema` '}'
+    object_schema: '{' '"type"' ':' '"object"' ',' '"properties"' ':' '[' `properties` ']' '}'
+    properties: `property` | `property` ',' `properties`
+    property: '{' '"name"'     ':' `string` ','
+            :     '"required"' ':' `boolean` ','
+            :     '"schema"'   ':' `schema` '}'
     identifier: [A-Za-z0-9_]+
 
 .. note::
