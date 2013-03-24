@@ -12,19 +12,22 @@ Model System
 
     Because our schemas are used to generate documentation, the order of
     object properties needs to be preserved, there also needs to be a way to
-    inline documentation text. Flexibility is actually detrimental for our use
-    case. Our system calls for a rigid and dead-simple approach.
+    inline documentation text.
 
     Because Cosmic must be extremely portable, it is essential that we keep
-    the feature list to a minimum. In this instance, the minimum is generating
-    documentation and basic validation of data structure and types. Instead of
-    making you learn a new `DSL <http://en.wikipedia.org/wiki/Domain-
-    specific_language>`_ for obscure validation, we encourage you to use the
-    power of your language. The benefits of describing schemas in minute
-    detail are greatly outweighed by the costs of growing the amount of code
-    that needs to be ported.
-    
-    The Python implementation of the model system is around 500 lines of code.
+    the feature list to a minimum. Our model system must:
+
+        1. Validate data by data types.
+
+        2. Help generate documentation.
+
+    Instead of making you learn a new `DSL
+    <http://en.wikipedia.org/wiki/Domain- specific_language>`_ for obscure
+    validation, we encourage you to use the power of your language. The
+    benefits of describing schemas in minute detail are greatly outweighed by
+    the costs of growing the amount of code that needs to be ported and
+    maintained. The Python implementation of the model system is `around 550
+    lines of code <https://github.com/cosmic-api/cosmic.py/blob/master/cosmic/models.py>`_.
 
 .. glossary::
 
