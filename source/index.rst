@@ -15,3 +15,4 @@ Welcome to Cosmic Docs! This document will describe in detail the architecture o
    models
    api
    actions
+   registry

@@ -36,23 +36,23 @@ Model System
         A data type definition that consists of a normalization and a
         serialization function. The output of a model's normalization function
         must be of the same form as the input of its serialization function.
-        Together, these functions define the *normalized form* of the data.
+        Together, these functions define the *native form* of the data.
 
-    Normalized form
+    Native form
 
         Data in its rich internal representation. For most built-in types,
         this data will consist of language primitives. In object-oriented
-        languages, normalized data will often take the form of class
+        languages, native data will often take the form of class
         instances.
 
     Normalization
 
-        Turning data as provided by the JSON parser into its normalized form.
-        Validation is always performed during normalization.
+        Turning data as provided by the JSON parser into its native form.
+        Validation is always performed during this process.
 
     Serialization
 
-        Turning normalized data into the form expected by the JSON serializer.
+        Turning native data into the form expected by the JSON serializer.
 
 Built-In Types
 --------------
@@ -61,8 +61,8 @@ Cosmic provides 9 built-in types. Each implementation must provide 9
 corresponding models, each model containing a serialization and a
 normalization function.
 
-The normalized form of the built-in types is implementation-dependent and will
-be defined in language-specific documentation. The serialized form and the
+The native form of the built-in types is implementation-dependent and will be
+defined in language-specific documentation. The serialized form and the
 validation logic, however, is identical across all implementations. Below is a
 list of all built-in models and their validation logic.
 
@@ -87,10 +87,10 @@ list of all built-in models and their validation logic.
 ``array``
     Must be expressed as a JSON array. The implementation must normalize each
     of its items against the *items* schema. If an item normalization fails
-    with a validation error, the array normalization must fail too. The
-    normalized form of an array must be an ordered sequence of normalized
-    items, in the same order as they appear in the JSON form. If the array was
-    empty, an empty sequence must be returned.
+    with a validation error, the array normalization must fail too. The native
+    form of an array must be an ordered sequence of native values, in the same
+    order as they appear in the JSON form. If the array was empty, an empty
+    sequence must be returned.
 
 ``object``
     Must be expressed as a JSON object. If the object has a key that is
@@ -98,9 +98,9 @@ list of all built-in models and their validation logic.
     must be thrown. Likewise, if *properties* has a required property whose
     name is not a key in the object, a validation error must be thrown. For
     every key-value pair in the object, the value must be normalized against
-    the *schema* of the corresponding property in *properties*. The normalized
+    the *schema* of the corresponding property in *properties*. The native 
     form of the object must be an associative array containing all key-value
-    pairs from the original object with normalized values.
+    pairs from the original object with native values.
 
 ``json``
     Can be any JSON value. No validation is performed during normalization.
@@ -124,17 +124,17 @@ Schemas
         validate.
 
 Because schemas need to be passed over the wire, they are implemented as
-models. Like any models, schemas have a normalized form and a JSON form. The
-normalized form of a schema must provide methods to normalize and serialize
-data that the schema describes, this is the primary function of the schema.
+models. Like any models, schemas have a native form and a JSON form. The
+native form of a schema must provide methods to normalize and serialize data
+that the schema describes, this is the primary function of the schema.
 Internally, however, these methods delegate their work to the actual model
-whose data the schema describes. A normalized schema is effectively a wrapper
-for a model:
+whose data the schema describes. A native schema object is effectively a
+wrapper for a model:
 
 .. image:: _static/schemas-are-models.png
 
-The way the normalized form of the schema works is up to the implementation.
-The serialized form (JSON form) is the primary way of dealing with schemas and
+The way the native form of the schema works is up to the implementation. The
+serialized form (JSON form) is the primary way of dealing with schemas and
 will work across implementations. From this point on, *schema* will refer to
 the serialized form.
 
@@ -207,9 +207,9 @@ reads ``null``. In JavaScript, these entities are represented by ``null`` and
 ``undefined`` respectively. In many other languages this distinction does not
 exist.
 
-In most implementations, ``null`` may be used in the normalized form to denote
-an absense of value. For example, one might set an object property to ``null``
-to remove it from the object. During serialization, these properties will be
+In most implementations, ``null`` may be used in the native form to denote an
+absense of value. For example, one might set an object property to ``null`` to
+remove it from the object. During serialization, these properties will be
 omitted. The only time where this may cause trouble is if the property is of
 type ``json``. Will the serializer omit it or treat it as an explicit value?
 
