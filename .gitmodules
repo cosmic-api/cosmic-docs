@@ -1,3 +1,0 @@
-[submodule "sphinx-bootstrap"]
-	path = sphinx-bootstrap
-	url = git@github.com:cosmic-api/sphinx-bootstrap.git
