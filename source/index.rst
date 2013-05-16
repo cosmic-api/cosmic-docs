@@ -12,7 +12,6 @@ Welcome to Cosmic Docs! This document will describe in detail the architecture o
    :maxdepth: 2
    :numbered:
 
-   models
    api
    actions
    registry

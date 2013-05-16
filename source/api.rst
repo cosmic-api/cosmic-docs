@@ -1,11 +1,11 @@
 APIs
 ====
 
-Because APIs need to be passed over the wire, they are implemented as a model,
-referenced as ``cosmic.API``.
+Because APIs need to be passed over the wire, they are implemented as
+serializable types, referenced as ``cosmic.API``.
 
 API spec
-  A piece of data that describes an API. The JSON form of the API model.
+  A piece of data that describes an API. The JSON form of the API type.
 
 Every API built with Cosmic provides a ``/spec.json`` endpoint. When accessed
 by a GET request, it will return the spec of the API. This URL is all the
@@ -17,8 +17,8 @@ Here is the JSON schema of the API model:
 .. code:: json
 
     {
-        "type": "object",
-        "properties": [
+        "type": "struct",
+        "fields": [
             {
                 "name": "name",
                 "schema": {"type": "string"},
@@ -42,7 +42,7 @@ Here is the JSON schema of the API model:
                 "required": true,
                 "schema": {
                     "type": "array",
-                    "items": {"type": "cosmic.APIModel"}
+                    "items": {"type": "cosmic.Model"}
                 }
             }
         ]
@@ -57,15 +57,15 @@ For actions, see the :ref:`actions` section.
 API Models
 ----------
 
-``{"type": "cosmic.APIModel"}`` references a special model whose job is to
-serialize and normalize API models. When serialized, a model consists of a
-name and a schema. Here is the JSON schema for APIModel:
+``{"type": "cosmic.Model"}`` references a serializer whose job is to serialize
+and deserialize API models. When serialized, a model consists of a name and a
+schema. Here is the JSON schema for Model:
 
 .. code:: json
 
     {
-        "type": "object",
-        "properties": [
+        "type": "struct",
+        "fields": [
             {
                 "name": "name",
                 "required": true,
@@ -79,7 +79,7 @@ name and a schema. Here is the JSON schema for APIModel:
         ]
     }
 
-When you normalize an API model, an object will be created (a class in most
+When you deserialize an API model, an object will be created (a class in most
 object-oriented languages) that will mimic the original model specified in the
 API author's code. Like the original, it should provide method to serialize
 and normalize the model data. Of course, custom validation cannot be performed
@@ -88,5 +88,5 @@ because its code cannot be passed over the wire as easily as the schema.
 Auto-generated API Clients
 --------------------------
 
-Because APIs are implemented as a models, building an API client simply
-involves normalizing an API from its JSON form, the API spec.
+Because APIs are implemented as a serializable types, building an API client
+simply involves deserializing an API from its JSON form, the API spec.
