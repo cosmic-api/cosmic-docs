@@ -6,7 +6,9 @@
 Cosmic Docs
 ===========
 
-Welcome to Cosmic Docs! This document will describe in detail the architecture of Cosmic and provide a strict specification that every implementation of Cosmic must follow. The canonical implementation is written in `Python <http://www.python.org/>`_. If you would like to get started with Cosmic, dive into the `Python documentation </documentation/python/>`_ and use this document as a reference. If you would like to hack on Cosmic, this document is for you.
+Welcome to Cosmic Docs! This document will describe in detail the architecture of Cosmic and provide a strict specification that every implementation of Cosmic must follow. The canonical implementation is written in `Python <http://www.python.org/>`_. If you would like to get started with Cosmic, dive into the `Python documentation </docs/cosmic/python/>`_ and use this document as a reference. If you would like to hack on Cosmic, this document is for you.
+
+An integral part of Cosmic is our simple yet powerful serialization library, `Teleport </docs/teleport/spec/>`_.
 
 .. toctree::
    :maxdepth: 2
