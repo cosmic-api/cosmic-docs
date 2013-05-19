@@ -97,7 +97,7 @@ html_theme = 'default'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "github_url": "https://github.com/cosmic-api/teleport-docs"
+    "github_url": "https://github.com/cosmic-api/cosmic-docs"
 }
 
 # This is necessary for Cosmic site builder. Keep it here.
