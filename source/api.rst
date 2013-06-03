@@ -12,40 +12,13 @@ by a GET request, it will return the spec of the API. This URL is all the
 information that Cosmic needs to generate documentation and build native API
 clients.
 
-Here is the JSON schema of the API model:
+Here is the schema of the API type::
 
-.. code:: json
-
-    {
-        "type": "struct",
-        "fields": [
-            {
-                "name": "name",
-                "schema": {"type": "string"},
-                "required": true
-            },
-            {
-                "name": "homepage",
-                "schema": {"type": "string"},
-                "required": false
-            },
-            {
-                "name": "actions",
-                "required": true,
-                "schema": {
-                    "type": "array",
-                    "items": {"type": "cosmic.Action"}
-                }
-            },
-            {
-                "name": "models",
-                "required": true,
-                "schema": {
-                    "type": "array",
-                    "items": {"type": "cosmic.Model"}
-                }
-            }
-        ]
+    Struct {
+        required name     :: String
+        optional homepage :: String
+        required models   :: Array(cosmic.Model)
+        required actions  :: OrderedMap(cosmic.Function)
     }
 
 The API *name* will be used as a namespace for referencing the API's models.
@@ -59,24 +32,11 @@ API Models
 
 ``{"type": "cosmic.Model"}`` references a serializer whose job is to serialize
 and deserialize API models. When serialized, a model consists of a name and a
-schema. Here is the JSON schema for Model:
+schema. Here is the JSON schema for Model::
 
-.. code:: json
-
-    {
-        "type": "struct",
-        "fields": [
-            {
-                "name": "name",
-                "required": true,
-                "schema": {"type": "string"}
-            },
-            {
-                "name": "schema",
-                "required": true,
-                "schema": {"type": "schema"}
-            }
-        ]
+    Struct {
+        required name    :: String
+        optional returns :: Schema
     }
 
 When you deserialize an API model, an object will be created (a class in most
