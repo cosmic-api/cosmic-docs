@@ -12,6 +12,7 @@ Actions are functions provided by the API. They are serialized by
     Struct {
         optional accepts :: Schema
         optional returns :: Schema
+        optional doc     :: String
     }
 
 An action name is unique per API. The URL for an action called ``hello`` would
