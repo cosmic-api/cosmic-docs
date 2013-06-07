@@ -36,7 +36,7 @@ schema. Here is the JSON schema for Model::
 
     Struct {
         required name    :: String
-        optional returns :: Schema
+        optional schema  :: Schema
     }
 
 When you deserialize an API model, an object will be created (a class in most
