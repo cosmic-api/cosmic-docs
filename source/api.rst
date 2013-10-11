@@ -15,10 +15,19 @@ clients.
 Here is the schema of the API type::
 
     Struct {
-        required name     :: String
+        required name :: String
         optional homepage :: String
-        required models   :: Array(cosmic.Model)
-        required actions  :: OrderedMap(cosmic.Function)
+        required models :: OrderedMap(Struct {
+            required schema :: Schema
+            required required :: Boolean
+            optional doc :: String
+        })
+        required query_fields :: OrderedMap(Struct {
+            required schema :: Schema
+            required required :: Boolean
+            optional doc :: String
+        })
+        required actions :: OrderedMap(cosmic.Function)
     }
 
 The API *name* will be used as a namespace for referencing the API's models.
@@ -27,26 +36,3 @@ that (see :ref:`registry`). Optionally, you can specify a *homepage* as a URL.
 Both *actions* and *models* are arrays of objects associated with the API.
 For actions, see the :ref:`actions` section.
 
-API Models
-----------
-
-``{"type": "cosmic.Model"}`` references a serializer whose job is to serialize
-and deserialize API models. When serialized, a model consists of a name and a
-schema. Here is the JSON schema for Model::
-
-    Struct {
-        required name    :: String
-        optional schema  :: Schema
-    }
-
-When you deserialize an API model, an object will be created (a class in most
-object-oriented languages) that will mimic the original model specified in the
-API author's code. Like the original, it should provide method to serialize
-and normalize the model data. Of course, custom validation cannot be performed
-because its code cannot be passed over the wire as easily as the schema.
-
-Auto-generated API Clients
---------------------------
-
-Because APIs are implemented as a serializable types, building an API client
-simply involves deserializing an API from its JSON form, the API spec.
